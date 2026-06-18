@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nosso Casamento | Livro Virtual</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-site: #e5e2da;          /* Fundo sutil simulando ambiente */
+            --bg-livro: #faf9f6;         /* Papel off-white elegante */
+            --text-dark: #2A2A2A;
+            --text-muted: #666666;
+            --accent-gold: #c5a880;
+            --accent-gold-hover: #b3956b;
+            --border-color: #eae8e2;
+            --shadow-livro: 0 15px 35px rgba(0,0,0,0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--bg-site);
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+            padding: 20px;
+        }
+
+        h1, h2, h3 {
+            font-family: 'Cormorant Garamond', serif;
+            font-weight: 300;
+        }
+
+        /* --- Container do Livro --- */
+        .book-container {
+            width: 100%;
+            max-width: 500px;
+            height: 720px;
+            position: relative;
+            perspective: 1500px; /* Cria o ambiente 3D */
+            box-shadow: var(--shadow-livro);
+            border-radius: 4px;
+        }
+
+        /* --- Estrutura das Páginas --- */
+        .page {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform-style: preserve-3d;
+            transform-origin: left center;
+            transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1);
+            background-color: var(--bg-livro);
+            border-radius: 0 4px 4px 0;
+            box-shadow: inset 5px 0 10px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            padding: 35px 30px;
+            overflow-y: auto;
+            backface-visibility: hidden;
+        }
+
+        /* Capa Customizada com Ajuste de Centralização */
+        .page-capa {
+            background-image: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)), url('01.jpg');
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-position: center 40%;
+            color: #ffffff;
+        }
+
+        .page-capa .intro { color: #e0e0e0; }
+        .page-capa .names { color: #ffffff; font-weight: 400; text-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+        .page-capa .date { color: var(--accent-gold); font-weight: 400; }
+        .page-capa .divider { background-color: var(--accent-gold); }
+
+        /* Estilização da Última Página (Vídeo de Fundo com Som) */
+        .page-video-bg {
+            position: relative;
+            color: #ffffff;
+            background-color: #000;
+            padding: 35px 30px;
+        }
+
+        .bg-video-element {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+        }
+
+        .video-overlay-content {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .video-overlay-content h2, .video-overlay-content p {
+            text-shadow: 0 2px 15px rgba(0,0,0,0.8);
+        }
+
+        /* Quando a página vira, ela rotaciona para a esquerda */
+        .page.flipped {
+            transform: rotateY(-180deg);
+        }
+
+        /* Controle Inicial de Z-Index para 7 páginas */
+        .page:nth-child(1) { z-index: 7; }
+        .page:nth-child(2) { z-index: 6; }
+        .page:nth-child(3) { z-index: 5; }
+        .page:nth-child(4) { z-index: 4; }
+        .page:nth-child(5) { z-index: 3; }
+        .page:nth-child(6) { z-index: 2; }
+        .page:nth-child(7) { z-index: 1; }
+
+        /* --- Elementos de Navegação --- */
+        .nav-controls {
+            margin-top: auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 15px;
+            border-top: 1px solid var(--border-color);
+            z-index: 3;
+        }
+
+        .page-video-bg .nav-controls {
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-nav {
+            background: none;
+            border: none;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--accent-gold);
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .page-capa .btn-nav, .page-video-bg .btn-nav {
+            color: #ffffff;
+            border: 1px solid rgba(255,255,255,0.4);
+            padding: 8px 16px;
+            border-radius: 2px;
+            background: rgba(0,0,0,0.3);
+        }
+
+        .btn-nav:hover {
+            color: var(--accent-gold-hover);
+        }
+
+        .page-capa .btn-nav:hover, .page-video-bg .btn-nav:hover {
+            color: var(--accent-gold);
+            border-color: var(--accent-gold);
+        }
+
+        /* --- Elementos Internos --- */
+        .center-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            height: 100%;
+        }
+
+        .divider {
+            width: 50px;
+            height: 1px;
+            background-color: var(--accent-gold);
+            margin: 20px 0;
+        }
+
+        .intro { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 3px; color: var(--text-muted); }
+        .names { font-size: 3rem; line-height: 1.2; margin: 15px 0; }
+        .date { font-size: 1.4rem; color: var(--accent-gold); }
+
+        /* Container do Vídeo Tradicional (Pág 2) */
+        .video-box {
+            width: 100%;
+            height: 240px;
+            margin: 20px 0;
+            border-radius: 3px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            background-color: #000;
+        }
+        .video-box video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Galeria Vertical (2 Fotos Elegantes) */
+        .page-gallery-two {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .page-gallery-two img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 3px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        /* Formulários */
+        .form-group {
+            text-align: left;
+            margin-bottom: 16px;
+            width: 100%;
+        }
+        .form-group label {
+            display: block;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+            color: var(--text-muted);
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 3px;
+            font-size: 0.9rem;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--accent-gold);
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        /* Caixa do Mapa */
+        .map-box {
+            width: 100%;
+            height: 220px;
+            margin: 15px 0;
+            border-radius: 3px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+        .map-box iframe { width: 100%; height: 100%; border: 0; }
+
+        .status-msg { font-size: 0.85rem; margin-top: 10px; display: none; }
+        .success { color: #4CAF50; }
+        .error { color: #f44336; }
+
+        /* Rodapé de Créditos Institucionais */
+        .book-footer {
+            margin-top: 25px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            text-align: center;
+        }
+        .book-footer a {
+            color: var(--text-dark);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        .book-footer a:hover {
+            color: var(--accent-gold);
+        }
+
+        @media (max-width: 550px) {
+            .book-container { height: 660px; }
+            .names { font-size: 2.4rem; }
+            .page-gallery-two img { height: 160px; }
+            .video-box { height: 200px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="book-container">
+
+        <div class="page page-capa" id="page-1">
+            <div class="center-content">
+                <p class="intro">Convidamos para o nosso casamento</p>
+                <h1 class="names">Gabriel & Mariana</h1>
+                <div class="divider"></div>
+                <p class="date">17 . Outubro . 2026</p>
+            </div>
+            <div class="nav-controls" style="border-top: none;">
+                <span></span>
+                <button class="btn-nav" onclick="nextPage(1)">Abrir Convite →</button>
+            </div>
+        </div>
+
+        <div class="page" id="page-2">
+            <h2>Um Recado Especial</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 5px;">Deem um play para assistir</p>
+            
+            <div class="video-box">
+                <video id="video-pag2" controls preload="metadata" poster="01.jpg">
+                    <source src="love-story.mp4" type="video/mp4">
+                    Seu navegador não suporta a tag de vídeo.
+                </video>
+            </div>
+            
+            <div class="nav-controls">
+                <button class="btn-nav" onclick="prevPage(1)">← Voltar</button>
+                <button class="btn-nav" onclick="nextPage(2)">Nossa História →</button>
+            </div>
+        </div>
+
+        <div class="page" id="page-3">
+            <h2>Nossa História</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px;">Momentos Inesquecíveis</p>
+            
+            <div class="page-gallery-two">
+                <img src="02.jpg" alt="Foto 02">
+                <img src="03.jpg" alt="Foto 03">
+            </div>
+            
+            <div class="nav-controls">
+                <button class="btn-nav" onclick="prevPage(2)">← Voltar</button>
+                <button class="btn-nav" onclick="nextPage(3)">Mais Fotos →</button>
+            </div>
+        </div>
+
+        <div class="page" id="page-4">
+            <h2>E o Sonho Continua...</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px;">Rumo ao Altar</p>
+            
+            <div class="page-gallery-two">
+                <img src="04.jpg" alt="Foto 04">
+                <img src="05.jpg" alt="Foto 05">
+            </div>
+            
+            <div class="nav-controls">
+                <button class="btn-nav" onclick="prevPage(3)">← Voltar</button>
+                <button class="btn-nav" onclick="nextPage(4)">Local →</button>
+            </div>
+        </div>
+
+        <div class="page" id="page-5">
+            <h2>Local do Evento</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 5px;">Cerimônia & Recepção</p>
+            
+            <p style="font-size: 0.9rem; margin-top: 15px;"><strong id="txt-local-nome">Espaço das Oliveiras</strong></p>
+            <p style="font-size: 0.8rem; color: var(--text-muted);" id="txt-local-endereco">Av. Principal dos Jardins, 1234 - São Paulo - SP</p>
+            
+            <div class="map-box">
+                <iframe id="mapa-frame" src="" allowfullscreen="" loading="lazy"></iframe>
+            </div>
+
+            <a href="#" id="btn-gps" target="_blank" class="btn-submit" style="text-align: center; text-decoration: none; display: block; padding: 10px; font-size: 0.75rem;">Abrir no Google Maps</a>
+
+            <div class="nav-controls">
+                <button class="btn-nav" onclick="prevPage(4)">← Voltar</button>
+                <button class="btn-nav" onclick="nextPage(5)">RSVP →</button>
+            </div>
+        </div>
+
+        <div class="page" id="page-6">
+            <h2>Confirmar Presença</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">Sua presença é essencial</p>
+            
+            <form id="form-rsvp" onsubmit="salvarPresenca(event)">
+                <div class="form-group">
+                    <label for="nome">Nome Completo</label>
+                    <input type="text" id="nome" required>
+                </div>
+                <div class="form-group">
+                    <label for="cpf">CPF (Apenas números)</label>
+                    <input type="text" id="cpf" pattern="\d{11}" placeholder="Ex: 00000000000" required>
+                </div>
+                <div class="form-group">
+                    <label for="telefone">Telefone</label>
+                    <input type="tel" id="telefone" placeholder="Ex: (11) 99999-9999" required>
+                </div>
+                <button type="submit" class="btn-submit" id="btn-enviar">Confirmar</button>
+                
+                <div id="msg-sucesso" class="status-msg success">✨ Presença confirmada!</div>
+                <div id="msg-erro" class="status-msg error">❌ Erro ao salvar.</div>
+            </form>
+
+            <div class="nav-controls">
+                <button class="btn-nav" onclick="prevPage(5)">← Voltar</button>
+                <button class="btn-nav" onclick="nextPage(6)">Finalizar →</button>
+            </div>
+        </div>
+
+        <div class="page page-video-bg" id="page-7">
+            <video id="video-pag7" class="bg-video-element" loop playsinline>
+                <source src="love-story.mp4" type="video/mp4">
+            </video>
+            
+            <div class="video-overlay-content" style="background: rgba(0,0,0,0.4); width:128%; height:112%; margin: -35px -30px; padding: 35px 30px;">
+                <div class="center-content">
+                    <h2 style="font-size: 2.5rem;">Esperamos Você!</h2>
+                    <div class="divider"></div>
+                    <p style="font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; color: #f0e6d2;">Com carinho, os noivos.</p>
+                </div>
+                <div class="nav-controls" style="margin-top: auto;">
+                    <button class="btn-nav" onclick="prevPage(6)">← Início</button>
+                    <span></span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="book-footer">
+        Site criado por 
+        <a href="https://instagram.com/inoivei.app" target="_blank">@inoivei.app</a> & 
+        <a href="https://instagram.com/systemsjc_" target="_blank">@systemsjc_</a>
+    </div>
+
+    <script>
+        // --- CONFIGURAÇÃO SUPABASE CLIENT ---
+        const SUPABASE_URL = "SUA_SUPABASE_URL_AQUI";
+        const SUPABASE_ANON_KEY = "SUA_SUPABASE_ANON_KEY_AQUI";
+        const CASAMENTO_ID = "casamento_livro_modelo"; 
+
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // --- MECÂNICA DO LIVRO (PAGINAÇÃO INTELIGENTE) ---
+        function nextPage(pageNumber) {
+            const currentPage = document.getElementById(`page-${pageNumber}`);
+            currentPage.classList.add('flipped');
+            
+            setTimeout(() => {
+                currentPage.style.zIndex = pageNumber;
+            }, 500);
+
+            // Gerenciamento inteligente de mídia por página
+            controlarVideos(pageNumber + 1);
+        }
+
+        function prevPage(pageNumber) {
+            const previousPage = document.getElementById(`page-${pageNumber}`);
+            previousPage.style.zIndex = 12 - previousPage.id.split('-')[1]; 
+            previousPage.classList.remove('flipped');
+
+            controlarVideos(pageNumber);
+        }
+
+        // Lógica para pausar vídeos ocultos e dar play/unmute quando visíveis
+        function controlarVideos(paginaAtiva) {
+            const v2 = document.getElementById('video-pag2');
+            const v7 = document.getElementById('video-pag7');
+
+            // Gerencia Página 2 (Recado Especial)
+            if (paginaAtiva === 2) {
+                v2.play().catch(e => console.log("Autoplay bloqueado pelo browser"));
+            } else {
+                v2.pause();
+            }
+
+            // Gerencia Página 7 (Contracapa com som)
+            if (paginaAtiva === 7) {
+                v7.play().catch(e => {
+                    console.log("Áudio ativo requer interação prévia. Tentando reprodução secundária.");
+                    // Caso o navegador bloqueie por falta de clique prévio do usuário nas páginas anteriores
+                    v7.muted = true;
+                    v7.play();
+                });
+            } else {
+                v7.pause();
+            }
+        }
+
+        // --- INTEGRAÇÃO MAPA INTELIGENTE ---
+        function carregarMapaEstrategico() {
+            const endereco = document.getElementById('txt-local-endereco').innerText;
+            const enderecoFormatado = encodeURIComponent(endereco);
+            
+            const urlMapa = `https://maps.google.com/maps?q=${enderecoFormatado}&t=&z=15&ie=UTF-8&iwloc=&output=embed`;
+            document.getElementById('mapa-frame').src = urlMapa;
+            
+            document.getElementById('btn-gps').href = `https://maps.google.com/maps?q=${enderecoFormatado}`;
+        }
+
+        window.onload = function() {
+            carregarMapaEstrategico();
+        };
+
+        // --- SALVAR INSCRIÇÃO NO SUPABASE ---
+        async function salvarPresenca(event) {
+            event.preventDefault();
+            const btn = document.getElementById('btn-enviar');
+            const msgS = document.getElementById('msg-sucesso');
+            const msgE = document.getElementById('msg-erro');
+            
+            msgS.style.display = 'none';
+            msgE.style.display = 'none';
+            btn.disabled = true;
+            btn.innerText = "Salvando...";
+
+            try {
+                const { error } = await supabaseClient.from('confirmacoes').insert([{
+                    casamento_id: CASAMENTO_ID,
+                    nome_completo: document.getElementById('nome').value,
+                    cpf: document.getElementById('cpf').value,
+                    telefone: document.getElementById('telefone').value
+                }]);
+
+                if (error) throw error;
+                msgS.style.display = 'block';
+                document.getElementById('form-rsvp').reset();
+            } catch (err) {
+                console.error(err);
+                msgE.style.display = 'block';
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Confirmar";
+            }
+        }
+    </script>
+</body>
+</html>
