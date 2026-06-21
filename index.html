@@ -3,550 +3,389 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nosso Casamento | Livro Virtual</title>
+    <title>Portal de Casamento Premium</title>
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --bg-site: #e5e2da;          /* Fundo sutil simulando ambiente */
-            --bg-livro: #faf9f6;         /* Papel off-white elegante */
-            --text-dark: #2A2A2A;
-            --text-muted: #666666;
+            --bg-site: #fdfdfb;          
+            --bg-cards: #ffffff;
+            --text-dark: #1c1c1c;
+            --text-muted: #6e6e6c;
             --accent-gold: #c5a880;
             --accent-gold-hover: #b3956b;
-            --border-color: #eae8e2;
-            --shadow-livro: 0 15px 35px rgba(0,0,0,0.15);
+            --border-color: #f1f0ec;
+            --shadow-smooth: 0 10px 30px rgba(0,0,0,0.03);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; }
+        body { font-family: 'Montserrat', sans-serif; background-color: var(--bg-site); color: var(--text-dark); line-height: 1.6; }
+        h1, h2, h3, h4 { font-family: 'Cormorant Garamond', serif; font-weight: 300; letter-spacing: 1px; }
+        .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
 
-        body {
-            font-family: 'Montserrat', sans-serif;
-            background-color: var(--bg-site);
-            color: var(--text-dark);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            overflow-x: hidden;
-            padding: 20px;
-        }
+        /* --- NAVBAR FIXA --- */
+        .navbar { position: fixed; top: 0; left: 0; width: 100%; background-color: rgba(255, 255, 255, 0.95); backdrop-filter: blur(5px); z-index: 1000; border-bottom: 1px solid var(--border-color); }
+        .nav-container { display: flex; justify-content: space-between; align-items: center; height: 70px; }
+        .nav-logo { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; color: var(--text-dark); text-decoration: none; }
+        .nav-menu { display: flex; list-style: none; gap: 20px; }
+        .nav-menu a { text-decoration: none; color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; transition: color 0.3s; }
+        .nav-menu a:hover { color: var(--accent-gold); }
 
-        h1, h2, h3 {
-            font-family: 'Cormorant Garamond', serif;
-            font-weight: 300;
-        }
+        /* --- HERO / CAPA COM COUNTDOWN --- */
+        .hero { height: 100vh; background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('01.jpg'); background-size: cover; background-position: center 40%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; color: #ffffff; padding-top: 70px; }
+        .hero h1 { font-size: 4.5rem; margin-bottom: 10px; }
+        .countdown-container { display: flex; gap: 20px; margin-top: 30px; background: rgba(0, 0, 0, 0.2); padding: 15px 30px; border-radius: 4px; backdrop-filter: blur(4px); }
+        .countdown-item span { display: block; font-size: 2rem; font-weight: 300; color: var(--accent-gold); }
+        .countdown-item label { font-size: 0.65rem; text-transform: uppercase; color: #ddd; }
 
-        /* --- Container do Livro --- */
-        .book-container {
-            width: 100%;
-            max-width: 500px;
-            height: 720px;
-            position: relative;
-            perspective: 1500px; /* Cria o ambiente 3D */
-            box-shadow: var(--shadow-livro);
-            border-radius: 4px;
-        }
+        /* --- SEÇÕES GLOBAIS --- */
+        section { padding: 90px 0; border-bottom: 1px solid var(--border-color); }
+        .section-header { text-align: center; margin-bottom: 50px; }
+        .section-title { font-size: 3rem; margin-bottom: 8px; }
+        .section-subtitle { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 3px; color: var(--text-muted); }
 
-        /* --- Estrutura das Páginas --- */
-        .page {
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            top: 0;
-            left: 0;
-            transform-style: preserve-3d;
-            transform-origin: left center;
-            transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1);
-            background-color: var(--bg-livro);
-            border-radius: 0 4px 4px 0;
-            box-shadow: inset 5px 0 10px rgba(0,0,0,0.05);
-            display: flex;
-            flex-direction: column;
-            padding: 35px 30px;
-            overflow-y: auto;
-            backface-visibility: hidden;
-        }
+        /* --- VIDEO MENSAGEM --- */
+        .video-wrapper { max-width: 800px; margin: 0 auto; border-radius: 4px; overflow: hidden; aspect-ratio: 16/9; background:#000; box-shadow: var(--shadow-smooth); }
+        .video-wrapper video { width: 100%; height: 100%; object-fit: cover; }
 
-        /* Capa Customizada com Ajuste de Centralização */
-        .page-capa {
-            background-image: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)), url('01.jpg');
-            background-repeat: no-repeat;
-            background-size: cover;
-            background-position: center 40%;
-            color: #ffffff;
-        }
+        /* --- ÁLBUM DE FOTOS --- */
+        .gallery-container { display: flex; flex-direction: column; gap: 30px; }
+        .gallery-row { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+        .gallery-row img { width: 100%; height: 420px; object-fit: cover; border-radius: 4px; box-shadow: var(--shadow-smooth); }
 
-        .page-capa .intro { color: #e0e0e0; }
-        .page-capa .names { color: #ffffff; font-weight: 400; text-shadow: 0 2px 10px rgba(0,0,0,0.3); }
-        .page-capa .date { color: var(--accent-gold); font-weight: 400; }
-        .page-capa .divider { background-color: var(--accent-gold); }
-
-        /* Estilização da Última Página (Vídeo de Fundo com Som) */
-        .page-video-bg {
-            position: relative;
-            color: #ffffff;
-            background-color: #000;
-            padding: 35px 30px;
-        }
-
-        .bg-video-element {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            z-index: 1;
-        }
-
-        .video-overlay-content {
-            position: relative;
-            z-index: 2;
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-        }
-
-        .video-overlay-content h2, .video-overlay-content p {
-            text-shadow: 0 2px 15px rgba(0,0,0,0.8);
-        }
-
-        /* Quando a página vira, ela rotaciona para a esquerda */
-        .page.flipped {
-            transform: rotateY(-180deg);
-        }
-
-        /* Controle Inicial de Z-Index para 7 páginas */
-        .page:nth-child(1) { z-index: 7; }
-        .page:nth-child(2) { z-index: 6; }
-        .page:nth-child(3) { z-index: 5; }
-        .page:nth-child(4) { z-index: 4; }
-        .page:nth-child(5) { z-index: 3; }
-        .page:nth-child(6) { z-index: 2; }
-        .page:nth-child(7) { z-index: 1; }
-
-        /* --- Elementos de Navegação --- */
-        .nav-controls {
-            margin-top: auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-top: 15px;
-            border-top: 1px solid var(--border-color);
-            z-index: 3;
-        }
-
-        .page-video-bg .nav-controls {
-            border-top: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .btn-nav {
-            background: none;
-            border: none;
-            font-family: 'Montserrat', sans-serif;
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: var(--accent-gold);
-            cursor: pointer;
-            transition: color 0.3s;
-        }
-
-        .page-capa .btn-nav, .page-video-bg .btn-nav {
-            color: #ffffff;
-            border: 1px solid rgba(255,255,255,0.4);
-            padding: 8px 16px;
-            border-radius: 2px;
-            background: rgba(0,0,0,0.3);
-        }
-
-        .btn-nav:hover {
-            color: var(--accent-gold-hover);
-        }
-
-        .page-capa .btn-nav:hover, .page-video-bg .btn-nav:hover {
-            color: var(--accent-gold);
-            border-color: var(--accent-gold);
-        }
-
-        /* --- Elementos Internos --- */
-        .center-content {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            height: 100%;
-        }
-
-        .divider {
-            width: 50px;
-            height: 1px;
-            background-color: var(--accent-gold);
-            margin: 20px 0;
-        }
-
-        .intro { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 3px; color: var(--text-muted); }
-        .names { font-size: 3rem; line-height: 1.2; margin: 15px 0; }
-        .date { font-size: 1.4rem; color: var(--accent-gold); }
-
-        /* Container do Vídeo Tradicional (Pág 2) */
-        .video-box {
-            width: 100%;
-            height: 240px;
-            margin: 20px 0;
-            border-radius: 3px;
-            overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            background-color: #000;
-        }
-        .video-box video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        /* Galeria Vertical (2 Fotos Elegantes) */
-        .page-gallery-two {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin: 20px 0;
-        }
-        .page-gallery-two img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            border-radius: 3px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        }
-
-        /* Formulários */
-        .form-group {
-            text-align: left;
-            margin-bottom: 16px;
-            width: 100%;
-        }
-        .form-group label {
-            display: block;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 6px;
-            color: var(--text-muted);
-        }
-        .form-group input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 3px;
-            font-size: 0.9rem;
-        }
-
-        .btn-submit {
-            width: 100%;
-            padding: 14px;
-            background-color: var(--accent-gold);
-            color: #fff;
-            border: none;
-            border-radius: 3px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            font-size: 0.8rem;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-
-        /* Caixa do Mapa */
-        .map-box {
-            width: 100%;
-            height: 220px;
-            margin: 15px 0;
-            border-radius: 3px;
-            overflow: hidden;
-            border: 1px solid var(--border-color);
-        }
+        /* --- LOCALIZAÇÃO --- */
+        .local-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; align-items: center; }
+        .local-info h3 { font-size: 2rem; margin-bottom: 15px; color: var(--accent-gold); }
+        .local-info p { color: var(--text-muted); margin-bottom: 25px; }
+        .map-box { width: 100%; height: 350px; border-radius: 4px; overflow: hidden; border: 1px solid var(--border-color); box-shadow: var(--shadow-smooth); }
         .map-box iframe { width: 100%; height: 100%; border: 0; }
 
-        .status-msg { font-size: 0.85rem; margin-top: 10px; display: none; }
-        .success { color: #4CAF50; }
-        .error { color: #f44336; }
+        /* --- LISTA DE PRESENTES VIRTUAIS --- */
+        .gifts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; margin-top: 30px; }
+        .gift-card { background: #fff; border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden; text-align: center; padding-bottom: 20px; box-shadow: var(--shadow-smooth); }
+        .gift-card img { width: 100%; height: 200px; object-fit: cover; }
+        .gift-card h4 { font-size: 1.4rem; margin: 15px 0 5px; font-weight: 400; }
+        .gift-card .price { color: var(--accent-gold); font-weight: 500; font-size: 1.1rem; margin-bottom: 15px; }
+        .btn-gift { padding: 12px 24px; font-size: 0.75rem; background-color: var(--text-dark); color: #fff; border: none; border-radius: 4px; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; transition: background 0.3s; }
+        .btn-gift:hover { background-color: var(--accent-gold); }
 
-        /* Rodapé de Créditos Institucionais */
-        .book-footer {
-            margin-top: 25px;
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            letter-spacing: 1px;
-            text-align: center;
-        }
-        .book-footer a {
-            color: var(--text-dark);
-            text-decoration: none;
-            font-weight: 500;
-            transition: color 0.3s;
-        }
-        .book-footer a:hover {
-            color: var(--accent-gold);
-        }
+        /* --- MODAL DO PIX NATIVO --- */
+        .modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:2000; justify-content:center; align-items:center; }
+        .modal-content { background:#fff; padding:40px; border-radius:8px; max-width:450px; width:100%; text-align:center; position:relative; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+        .close-modal { position:absolute; top:15px; right:20px; font-size:1.5rem; cursor:pointer; color:var(--text-muted); }
+        .qr-placeholder { margin: 20px auto; background: #eee; width: 200px; height: 200px; display: flex; justify-content: center; align-items: center; border-radius: 4px; }
+        .qr-placeholder img { width:100%; height:100%; object-fit: contain; }
 
-        @media (max-width: 550px) {
-            .book-container { height: 660px; }
-            .names { font-size: 2.4rem; }
-            .page-gallery-two img { height: 160px; }
-            .video-box { height: 200px; }
-        }
+        /* --- CONFIRMAÇÃO RSVP & MURAL DE RECADOS --- */
+        .rsvp-mural-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 40px; }
+        .rsvp-card { background: #fff; padding: 40px; border-radius: 6px; border: 1px solid var(--border-color); box-shadow: var(--shadow-smooth); }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; color: var(--text-muted); }
+        .form-group input, .form-group textarea { width: 100%; padding: 12px; border: 1px solid #e2e2e0; border-radius: 4px; font-family: 'Montserrat', sans-serif; background: #fafafa; }
+        .btn-submit { width: 100%; padding: 14px; background-color: var(--accent-gold); color: #fff; border: none; border-radius: 4px; text-transform: uppercase; letter-spacing: 2px; font-size: 0.8rem; cursor: pointer; font-weight: 500; }
+        .btn-submit:hover { background-color: var(--accent-gold-hover); }
+
+        /* Mural Visual */
+        .mural-box { background: #fff; border: 1px solid var(--border-color); border-radius: 6px; padding: 30px; max-height: 480px; overflow-y: auto; box-shadow: var(--shadow-smooth); }
+        .recado-item { padding: 15px 0; border-bottom: 1px solid var(--border-color); }
+        .recado-autor { font-weight: 600; font-size: 0.85rem; color: var(--accent-gold); }
+        .recado-texto { font-size: 0.9rem; color: var(--text-dark); margin-top: 5px; font-style: italic; }
+
+        /* --- ENCERRAMENTO --- */
+        .footer-banner { position: relative; height: 450px; overflow: hidden; display: flex; justify-content: center; align-items: center; color: #ffffff; }
+        .footer-banner video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
+        .footer-overlay { position: relative; z-index: 2; background: rgba(0,0,0,0.4); width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+
+        .main-footer { padding: 35px 0; background-color: #ffffff; text-align: center; font-size: 0.75rem; color: var(--text-muted); border-top: 1px solid var(--border-color); }
+        .main-footer a { color: var(--text-dark); text-decoration: none; font-weight: 500; }
+
+        @media (max-width: 768px) { .nav-menu { display: none; } .hero h1 { font-size: 2.8rem; } .gallery-row, .local-grid, .rsvp-mural-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
 
-    <div class="book-container">
-
-        <div class="page page-capa" id="page-1">
-            <div class="center-content">
-                <p class="intro">Convidamos para o nosso casamento</p>
-                <h1 class="names">Gabriel & Mariana</h1>
-                <div class="divider"></div>
-                <p class="date">17 . Outubro . 2026</p>
-            </div>
-            <div class="nav-controls" style="border-top: none;">
-                <span></span>
-                <button class="btn-nav" onclick="nextPage(1)">Abrir Convite →</button>
-            </div>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="#" class="nav-logo">G & M</a>
+            <ul class="nav-menu">
+                <li><a href="#inicio">Início</a></li>
+                <li><a href="#video">Mensagem</a></li>
+                <li><a href="#fotos">Fotos</a></li>
+                <li><a href="#local">Localização</a></li>
+                <li><a href="#presentes">Lista de Presentes</a></li>
+                <li><a href="#rsvp">RSVP & Mensagens</a></li>
+            </ul>
         </div>
+    </nav>
 
-        <div class="page" id="page-2">
-            <h2>Um Recado Especial</h2>
-            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 5px;">Deem um play para assistir</p>
-            
-            <div class="video-box">
-                <video id="video-pag2" controls preload="metadata" poster="01.jpg">
-                    <source src="love-story.mp4" type="video/mp4">
-                    Seu navegador não suporta a tag de vídeo.
-                </video>
-            </div>
-            
-            <div class="nav-controls">
-                <button class="btn-nav" onclick="prevPage(1)">← Voltar</button>
-                <button class="btn-nav" onclick="nextPage(2)">Nossa História →</button>
-            </div>
+    <header id="inicio" class="hero">
+        <p class="intro">Convidamos para o nosso casamento</p>
+        <h1>Gabriel & Mariana</h1>
+        <p class="date">17 . Outubro . 2026</p>
+        
+        <div class="countdown-container">
+            <div class="countdown-item"><span id="days">00</span><label>Dias</label></div>
+            <div class="countdown-item"><span id="hours">00</span><label>Horas</label></div>
+            <div class="countdown-item"><span id="minutes">00</span><label>Min</label></div>
+            <div class="countdown-item"><span id="seconds">00</span><label>Seg</label></div>
         </div>
+    </header>
 
-        <div class="page" id="page-3">
-            <h2>Nossa História</h2>
-            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px;">Momentos Inesquecíveis</p>
-            
-            <div class="page-gallery-two">
-                <img src="02.jpg" alt="Foto 02">
-                <img src="03.jpg" alt="Foto 03">
-            </div>
-            
-            <div class="nav-controls">
-                <button class="btn-nav" onclick="prevPage(2)">← Voltar</button>
-                <button class="btn-nav" onclick="nextPage(3)">Mais Fotos →</button>
-            </div>
+    <section id="video" class="container">
+        <div class="section-header">
+            <h2 class="section-title">Um Recado Especial</h2>
+            <p class="section-subtitle">Assista à nossa mensagem</p>
         </div>
-
-        <div class="page" id="page-4">
-            <h2>E o Sonho Continua...</h2>
-            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px;">Rumo ao Altar</p>
-            
-            <div class="page-gallery-two">
-                <img src="04.jpg" alt="Foto 04">
-                <img src="05.jpg" alt="Foto 05">
-            </div>
-            
-            <div class="nav-controls">
-                <button class="btn-nav" onclick="prevPage(3)">← Voltar</button>
-                <button class="btn-nav" onclick="nextPage(4)">Local →</button>
-            </div>
-        </div>
-
-        <div class="page" id="page-5">
-            <h2>Local do Evento</h2>
-            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 5px;">Cerimônia & Recepção</p>
-            
-            <p style="font-size: 0.9rem; margin-top: 15px;"><strong id="txt-local-nome">Espaço das Oliveiras</strong></p>
-            <p style="font-size: 0.8rem; color: var(--text-muted);" id="txt-local-endereco">Av. Principal dos Jardins, 1234 - São Paulo - SP</p>
-            
-            <div class="map-box">
-                <iframe id="mapa-frame" src="" allowfullscreen="" loading="lazy"></iframe>
-            </div>
-
-            <a href="#" id="btn-gps" target="_blank" class="btn-submit" style="text-align: center; text-decoration: none; display: block; padding: 10px; font-size: 0.75rem;">Abrir no Google Maps</a>
-
-            <div class="nav-controls">
-                <button class="btn-nav" onclick="prevPage(4)">← Voltar</button>
-                <button class="btn-nav" onclick="nextPage(5)">RSVP →</button>
-            </div>
-        </div>
-
-        <div class="page" id="page-6">
-            <h2>Confirmar Presença</h2>
-            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">Sua presença é essencial</p>
-            
-            <form id="form-rsvp" onsubmit="salvarPresenca(event)">
-                <div class="form-group">
-                    <label for="nome">Nome Completo</label>
-                    <input type="text" id="nome" required>
-                </div>
-                <div class="form-group">
-                    <label for="cpf">CPF (Apenas números)</label>
-                    <input type="text" id="cpf" pattern="\d{11}" placeholder="Ex: 00000000000" required>
-                </div>
-                <div class="form-group">
-                    <label for="telefone">Telefone</label>
-                    <input type="tel" id="telefone" placeholder="Ex: (11) 99999-9999" required>
-                </div>
-                <button type="submit" class="btn-submit" id="btn-enviar">Confirmar</button>
-                
-                <div id="msg-sucesso" class="status-msg success">✨ Presença confirmada!</div>
-                <div id="msg-erro" class="status-msg error">❌ Erro ao salvar.</div>
-            </form>
-
-            <div class="nav-controls">
-                <button class="btn-nav" onclick="prevPage(5)">← Voltar</button>
-                <button class="btn-nav" onclick="nextPage(6)">Finalizar →</button>
-            </div>
-        </div>
-
-        <div class="page page-video-bg" id="page-7">
-            <video id="video-pag7" class="bg-video-element" loop playsinline>
+        <div class="video-wrapper">
+            <video id="video-recado" controls preload="metadata" poster="01.jpg">
                 <source src="love-story.mp4" type="video/mp4">
             </video>
+        </div>
+    </section>
+
+    <section id="fotos" class="container">
+        <div class="section-header">
+            <h2 class="section-title">Nossa História</h2>
+            <p class="section-subtitle">Nossos melhores momentos</p>
+        </div>
+        <div class="gallery-container">
+            <div class="gallery-row"><img src="02.jpg" alt="02"><img src="03.jpg" alt="03"></div>
+            <div class="gallery-row"><img src="04.jpg" alt="04"><img src="05.jpg" alt="05"></div>
+        </div>
+    </section>
+
+    <section id="local" class="container">
+        <div class="section-header">
+            <h2 class="section-title">Onde Celebrar</h2>
+            <p class="section-subtitle">Localização da Cerimônia e Recepção</p>
+        </div>
+        <div class="local-grid">
+            <div class="local-info">
+                <h3>Espaço das Oliveiras</h3>
+                <p id="txt-local-endereco">Av. Principal dos Jardins, 1234 - Jardim das Flores, São Paulo - SP</p>
+                <a href="#" id="btn-gps" target="_blank" class="btn-submit" style="text-decoration:none; text-align:center;">Como Chegar pelo GPS</a>
+            </div>
+            <div class="map-box"><iframe id="mapa-frame" src="" allowfullscreen="" loading="lazy"></iframe></div>
+        </div>
+    </section>
+
+    <section id="presentes" class="container">
+        <div class="section-header">
+            <h2 class="section-title">Lista de Presentes</h2>
+            <p class="section-subtitle">Presenteie os noivos (Valores convertidos em saldo Pix comercial)</p>
+        </div>
+        <div class="gifts-grid">
+            <div class="gift-card">
+                <img src="02.jpg" alt="Lua de Mel">
+                <h4>Jantar Romântico na Lua de Mel</h4>
+                <p class="price">R$ 250,00</p>
+                <button class="btn-gift" onclick="abrirCheckoutPix('Jantar na Lua de Mel', 250)">Presentear</button>
+            </div>
+            <div class="gift-card">
+                <img src="03.jpg" alt="Microondas">
+                <h4>Cota Unidade de Micro-ondas</h4>
+                <p class="price">R$ 450,00</p>
+                <button class="btn-gift" onclick="abrirCheckoutPix('Cota Micro-ondas', 450)">Presentear</button>
+            </div>
+            <div class="gift-card">
+                <img src="04.jpg" alt="Passeio">
+                <h4>Passeio de Barco do Casal</h4>
+                <p class="price">R$ 150,00</p>
+                <button class="btn-gift" onclick="abrirCheckoutPix('Passeio de Barco', 150)">Presentear</button>
+            </div>
+        </div>
+    </section>
+
+    <div id="pix-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="fecharModal()">&times;</span>
+            <h3 id="modal-titulo-presente" style="font-size:1.6rem; color:var(--accent-gold);">Contribuir para Presente</h3>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-top:5px;">Preencha seus dados para gerar o Pix:</p>
             
-            <div class="video-overlay-content" style="background: rgba(0,0,0,0.4); width:128%; height:112%; margin: -35px -30px; padding: 35px 30px;">
-                <div class="center-content">
-                    <h2 style="font-size: 2.5rem;">Esperamos Você!</h2>
-                    <div class="divider"></div>
-                    <p style="font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; color: #f0e6d2;">Com carinho, os noivos.</p>
-                </div>
-                <div class="nav-controls" style="margin-top: auto;">
-                    <button class="btn-nav" onclick="prevPage(6)">← Início</button>
-                    <span></span>
+            <div style="margin-top:15px; text-align:left;">
+                <input type="text" id="pix-nome" placeholder="Seu Nome Completo" style="width:100%; padding:10px; border:1px solid #ddd; margin-bottom:10px; border-radius:4px;">
+                <input type="text" id="pix-cpf" placeholder="Seu CPF" style="width:100%; padding:10px; border:1px solid #ddd; margin-bottom:10px; border-radius:4px;">
+            </div>
+
+            <button class="btn-submit" onclick="gerarEGravarPix()">Gerar QR Code Pix</button>
+
+            <div id="area-qr-code" style="display:none; margin-top:20px;">
+                <div class="qr-placeholder" id="qrcode-img"></div>
+                <p style="font-size:0.75rem; color:var(--text-muted);">Escaneie o QR Code ou use a chave Copia e Cola abaixo:</p>
+                <input type="text" id="pix-copia-cola" readonly style="width:100%; padding:8px; font-size:0.7rem; margin-top:5px; text-align:center;">
+                <button class="btn-gift" style="margin-top:10px; width:100%;" onclick="copiarChavePix()">Copiar Chave Pix</button>
+            </div>
+        </div>
+    </div>
+
+    <section id="rsvp" class="container">
+        <div class="rsvp-mural-grid">
+            <div class="rsvp-card">
+                <h2 style="font-size: 2rem; margin-bottom: 20px;">Confirmar Presença & Recado</h2>
+                <form id="form-rsvp" onsubmit="salvarTudo(event)">
+                    <div class="form-group">
+                        <label for="nome">Nome Completo</label>
+                        <input type="text" id="nome" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="cpf">CPF (Apenas números)</label>
+                        <input type="text" id="cpf" pattern="\d{11}" placeholder="00000000000" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="telefone">Telefone</label>
+                        <input type="tel" id="telefone" placeholder="(11) 99999-9999" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="mensagem">Deixe uma mensagem para os Noivos (Mural)</label>
+                        <textarea id="mensagem" rows="3" placeholder="Escreva aqui seu carinho..."></textarea>
+                    </div>
+                    <button type="submit" class="btn-submit" id="btn-enviar">Confirmar Presença</button>
+                </form>
+            </div>
+
+            <div>
+                <h2 style="font-size: 2rem; margin-bottom: 20px;">Mural de Recados</h2>
+                <div class="mural-box" id="mural-conteudo">
+                    <p style="color:var(--text-muted); font-size:0.9rem;">Carregando mensagens...</p>
                 </div>
             </div>
         </div>
+    </section>
 
+    <div class="footer-banner">
+        <video autoplay loop muted playsinline><source src="love-story.mp4" type="video/mp4"></video>
+        <div class="footer-overlay"><h2>Esperamos Você!</h2></div>
     </div>
 
-    <div class="book-footer">
-        Site criado por 
-        <a href="https://instagram.com/inoivei.app" target="_blank">@inoivei.app</a> & 
-        <a href="https://instagram.com/systemsjc_" target="_blank">@systemsjc_</a>
-    </div>
+    <footer class="main-footer">
+        Site criado por <a href="https://instagram.com/inoivei.app" target="_blank">@inoivei.app</a> & <a href="https://instagram.com/systemsjc_" target="_blank">@systemsjc_</a>
+    </footer>
 
     <script>
-        // --- CONFIGURAÇÃO SUPABASE CLIENT ---
+        // --- CONFIGURAÇÃO CLOUD SUPABASE ---
         const SUPABASE_URL = "SUA_SUPABASE_URL_AQUI";
         const SUPABASE_ANON_KEY = "SUA_SUPABASE_ANON_KEY_AQUI";
-        const CASAMENTO_ID = "casamento_livro_modelo"; 
+        const CASAMENTO_ID = "casamento_portal_completo"; 
+
+        // CHAVE PIX NATIVA (Insira o e-mail, celular ou chave aleatória que receberá o dinheiro)
+        const CHAVE_PIX_DESTINO = "seu-email-ou-chave-pix@dominio.com"; 
 
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // --- MECÂNICA DO LIVRO (PAGINAÇÃO INTELIGENTE) ---
-        function nextPage(pageNumber) {
-            const currentPage = document.getElementById(`page-${pageNumber}`);
-            currentPage.classList.add('flipped');
-            
-            setTimeout(() => {
-                currentPage.style.zIndex = pageNumber;
-            }, 500);
+        let presenteSelecionadoLocal = { item: "", valor: 0 };
 
-            // Gerenciamento inteligente de mídia por página
-            controlarVideos(pageNumber + 1);
-        }
+        // --- 1. CRONÔMETRO REGRESSIVO ---
+        const dataCasamento = new Date("October 17, 2026 18:00:00").getTime();
+        setInterval(function() {
+            const agora = new Date().getTime();
+            const diferenca = dataCasamento - agora;
+            document.getElementById("days").innerText = Math.floor(diferenca / (1000 * 60 * 60 * 24));
+            document.getElementById("hours").innerText = Math.floor((diferenca % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            document.getElementById("minutes").innerText = Math.floor((diferenca % (1000 * 60 * 60)) / (1000 * 60));
+            document.getElementById("seconds").innerText = Math.floor((diferenca % (1000 * 60)) / 1000);
+        }, 1000);
 
-        function prevPage(pageNumber) {
-            const previousPage = document.getElementById(`page-${pageNumber}`);
-            previousPage.style.zIndex = 12 - previousPage.id.split('-')[1]; 
-            previousPage.classList.remove('flipped');
-
-            controlarVideos(pageNumber);
-        }
-
-        // Lógica para pausar vídeos ocultos e dar play/unmute quando visíveis
-        function controlarVideos(paginaAtiva) {
-            const v2 = document.getElementById('video-pag2');
-            const v7 = document.getElementById('video-pag7');
-
-            // Gerencia Página 2 (Recado Especial)
-            if (paginaAtiva === 2) {
-                v2.play().catch(e => console.log("Autoplay bloqueado pelo browser"));
-            } else {
-                v2.pause();
-            }
-
-            // Gerencia Página 7 (Contracapa com som)
-            if (paginaAtiva === 7) {
-                v7.play().catch(e => {
-                    console.log("Áudio ativo requer interação prévia. Tentando reprodução secundária.");
-                    // Caso o navegador bloqueie por falta de clique prévio do usuário nas páginas anteriores
-                    v7.muted = true;
-                    v7.play();
-                });
-            } else {
-                v7.pause();
-            }
-        }
-
-        // --- INTEGRAÇÃO MAPA INTELIGENTE ---
-        function carregarMapaEstrategico() {
+        // --- 2. MAPA DINÂMICO ---
+        function carregarMapa() {
             const endereco = document.getElementById('txt-local-endereco').innerText;
-            const enderecoFormatado = encodeURIComponent(endereco);
-            
-            const urlMapa = `https://maps.google.com/maps?q=${enderecoFormatado}&t=&z=15&ie=UTF-8&iwloc=&output=embed`;
-            document.getElementById('mapa-frame').src = urlMapa;
-            
-            document.getElementById('btn-gps').href = `https://maps.google.com/maps?q=${enderecoFormatado}`;
+            document.getElementById('mapa-frame').src = `https://maps.google.com/maps?q=${encodeURIComponent(endereco)}&t=&z=15&ie=UTF-8&iwloc=&output=embed`;
+            document.getElementById('btn-gps').href = `https://maps.google.com/maps?q=${encodeURIComponent(endereco)}`;
         }
 
-        window.onload = function() {
-            carregarMapaEstrategico();
-        };
+        // --- 3. CARREGAR MURAL ---
+        async function carregarMural() {
+            const mural = document.getElementById('mural-conteudo');
+            try {
+                const { data, error } = await supabaseClient
+                    .from('confirmacoes')
+                    .select('nome_completo, mensagem')
+                    .eq('casamento_id', CASAMENTO_ID)
+                    .not('mensagem', 'is', null)
+                    .neq('mensagem', '')
+                    .order('id', { ascending: false });
 
-        // --- SALVAR INSCRIÇÃO NO SUPABASE ---
-        async function salvarPresenca(event) {
+                if (error) throw error;
+                mural.innerHTML = data.length === 0 ? `<p>Nenhuma mensagem deixada ainda.</p>` : data.map(item => `
+                    <div class="recado-item">
+                        <div class="recado-autor">${item.nome_completo}</div>
+                        <div class="recado-texto">"${item.mensagem}"</div>
+                    </div>
+                `).join('');
+            } catch(e) { console.error(e); }
+        }
+
+        // --- 4. SALVAR RSVP ---
+        async function salvarTudo(event) {
             event.preventDefault();
             const btn = document.getElementById('btn-enviar');
-            const msgS = document.getElementById('msg-sucesso');
-            const msgE = document.getElementById('msg-erro');
-            
-            msgS.style.display = 'none';
-            msgE.style.display = 'none';
             btn.disabled = true;
-            btn.innerText = "Salvando...";
-
             try {
                 const { error } = await supabaseClient.from('confirmacoes').insert([{
                     casamento_id: CASAMENTO_ID,
                     nome_completo: document.getElementById('nome').value,
                     cpf: document.getElementById('cpf').value,
-                    telefone: document.getElementById('telefone').value
+                    telefone: document.getElementById('telefone').value,
+                    mensagem: document.getElementById('mensagem').value
                 }]);
-
                 if (error) throw error;
-                msgS.style.display = 'block';
                 document.getElementById('form-rsvp').reset();
-            } catch (err) {
-                console.error(err);
-                msgE.style.display = 'block';
-            } finally {
-                btn.disabled = false;
-                btn.innerText = "Confirmar";
-            }
+                alert("Presença confirmada!");
+                carregarMural();
+            } catch (err) { alert(err.message); } finally { btn.disabled = false; }
         }
+
+        // --- 5. CHECKOUT E INTEGRAÇÃO PIX NATIVA (PADRÃO CASAR.COM) ---
+        function abrirCheckoutPix(item, valor) {
+            presenteSelecionadoLocal = { item, valor };
+            document.getElementById('modal-titulo-presente').innerText = item;
+            document.getElementById('pix-modal').style.display = 'flex';
+            document.getElementById('area-qr-code').style.display = 'none';
+        }
+
+        function fecharModal() { document.getElementById('pix-modal').style.display = 'none'; }
+
+        async function gerarEGravarPix() {
+            const nome = document.getElementById('pix-nome').value;
+            const cpf = document.getElementById('pix-cpf').value;
+
+            if(!nome || !cpf) { alert("Por favor, preencha o seu nome e CPF."); return; }
+
+            // Gera String Pix Copia e Cola Oficial simplificada usando API aberta estática
+            const chaveCopiaCola = `00020101021126580014br.gov.bcb.pix0114${CHAVE_PIX_DESTINO}5204000053039865405${presenteSelecionadoLocal.valor}.005802BR5913CASAMENTO6009SAOPAULO62070503***6304`;
+            
+            document.getElementById('pix-copia-cola').value = chaveCopiaCola;
+            
+            // Injeta imagem do QR Code dinamicamente baseado na string Pix gerada
+            document.getElementById('qrcode-img').innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(chaveCopiaCola)}" alt="QR Code Pix">`;
+            document.getElementById('area-qr-code').style.display = 'block';
+
+            // Grava a intenção de presente no Supabase associando ao doador
+            try {
+                await supabaseClient.from('confirmacoes').insert([{
+                    casamento_id: CASAMENTO_ID,
+                    nome_completo: nome + " (Presente: " + presenteSelecionadoLocal.item + ")",
+                    cpf: cpf,
+                    telefone: "Via Lista Presentes",
+                    presente_escolhido: presenteSelecionadoLocal.item,
+                    presente_valor: presenteSelecionadoLocal.amount,
+                    pago: true
+                }]);
+            } catch(e) { console.error("Erro ao registrar presente:", e); }
+        }
+
+        function copiarChavePix() {
+            const input = document.getElementById('pix-copia-cola');
+            input.select();
+            document.execCommand('copy');
+            alert("Chave Pix copiada com sucesso! Cole no seu aplicativo bancário para pagar.");
+        }
+
+        window.onload = function() { carregarMapa(); carregarMural(); };
     </script>
 </body>
 </html>
